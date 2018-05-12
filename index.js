@@ -15,7 +15,7 @@ const STORE = {
 function generateItemElement(item, itemIndex, template) {
   return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
-      <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
+      <span contenteditable="true" class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
       <div class="shopping-item-controls">
         <button class="shopping-item-toggle js-item-toggle">
             <span class="button-label">check</span>
@@ -73,6 +73,11 @@ function toggleCheckedForListItem(itemIndex) {
   STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
 }
 
+function changeItemName(itemIndex, newName) {
+  console.log('Changing name for item at index ' + itemIndex);
+  STORE.items[itemIndex].name = newName;
+}
+
 function removeListItem(itemIndex) {
   console.log('Removing item at index ' + itemIndex);
   STORE.items.splice(itemIndex, 1);
@@ -95,6 +100,15 @@ function handleItemCheckClicked() {
   });
 }
 
+function handleItemEdit() {
+  $('.js-shopping-list').on('blur', '.js-shopping-item', event => {
+    console.log('`handleItemEdit` ran');
+    const newName = $(event.currentTarget).text();
+    const itemIndex = getItemIndexFromElement(event.currentTarget);
+    changeItemName(itemIndex, newName);
+    renderShoppingList();
+  });
+}
 
 function handleDeleteItemClicked() {
   // this function will be responsible for when users want to delete a shopping list
@@ -125,6 +139,7 @@ function handleShoppingList() {
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleShowChecked();
+  handleItemEdit();
 }
 
 // when the page loads, call `handleShoppingList`
