@@ -3,16 +3,16 @@
 
 const STORE = {
   items:[
-    {name: 'apples', checked: false},
-    {name: 'oranges', checked: false},
-    {name: 'milk', checked: true},
-    {name: 'bread', checked: false}
+    {name: 'apples', checked: false, searched: true},
+    {name: 'oranges', checked: false, searched: true},
+    {name: 'milk', checked: true, searched: true},
+    {name: 'bread', checked: false, searched: true}
   ],
   showChecked:true
 };
 
 
-function generateItemElement(item, itemIndex, template) {
+function generateItemElement(item, itemIndex) {
   return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
       <span contenteditable="true" class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
@@ -32,10 +32,14 @@ function generateShoppingItemsString(shoppingList) {
   console.log('Generating shopping list element');
   let items = [];
   if (STORE.showChecked){
-    items = shoppingList.map((item, index) => generateItemElement(item, index));
+    for (let i = 0; i < shoppingList.length; i++){
+      if (shoppingList[i].searched) items.push(generateItemElement(shoppingList[i], i));
+    }
   }
   else {
-    items = shoppingList.filter((item) => !item.checked).map((item, index) => generateItemElement(item, index));
+    for (let i = 0; i < shoppingList.length; i++){
+      if (shoppingList[i].searched && !shoppingList[i].checked) items.push(generateItemElement(shoppingList[i], i));
+    }  
   }
   
   return items.join('');
@@ -54,7 +58,16 @@ function renderShoppingList() {
 
 function addItemToShoppingList(itemName) {
   console.log(`Adding "${itemName}" to shopping list`);
-  STORE.items.push({name: itemName, checked: false});
+  STORE.items.push({name: itemName, checked: false, searched: true});
+}
+
+function searchList(searchFilter) {
+  console.log(`Searching shopping list items for ${searchFilter}`);
+  if (searchFilter) {
+    STORE.items.map(item => item.name.indexOf(searchFilter) >= 0 ? item.searched = true : item.searched = false);
+  } else {
+    STORE.items.map(item => item.searched = true);
+  }
 }
 
 function handleNewItemSubmit() {
@@ -122,9 +135,20 @@ function handleDeleteItemClicked() {
 }
 
 function handleShowChecked() {
-  $('#js-shopping-list-form').on('click', '.showChecked', event => {
+  $('#js-search-check-form').on('click', '.showChecked', event => {
     console.log('`handleShowChecked` ran');
     STORE.showChecked = !STORE.showChecked;
+    renderShoppingList();
+  });
+}
+
+function handleSearch() {
+  $('#js-search-check-form').submit(function(event) {
+    event.preventDefault();
+    console.log('`handleSearch` ran');
+    const searchFilter = $('.searchBox').val();
+    console.log(searchFilter);
+    searchList(searchFilter);
     renderShoppingList();
   });
 }
@@ -139,6 +163,7 @@ function handleShoppingList() {
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleShowChecked();
+  handleSearch();
   handleItemEdit();
 }
 
